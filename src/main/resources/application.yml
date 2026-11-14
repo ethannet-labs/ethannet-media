@@ -13,6 +13,9 @@ spring:
       ddl-auto: validate
 
 server:
+  # Loopback only by default, so the api is never reachable from the network.
+  # Set SERVER_ADDRESS=0.0.0.0 only where it must be (e.g. inside a container).
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: ${PORT:4001}
 
 management:

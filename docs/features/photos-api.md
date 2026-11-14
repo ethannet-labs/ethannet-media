@@ -5,29 +5,31 @@ The Spring Boot service behind the ethannet ui. Today it serves one endpoint, `G
 ## Prerequisites
 
 - **JDK 25.** With a user-local install, point `JAVA_HOME` at it, e.g. `export JAVA_HOME="$HOME/.jdks/jdk-25.0.5+8"` and `PATH="$JAVA_HOME/bin:$PATH"`.
-- **Podman**, with its user API socket enabled for Testcontainers:
+- **Podman**, with its user API socket enabled for Testcontainers and docker-compose:
 
   ```
   systemctl --user enable --now podman.socket
   export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-  export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=$XDG_RUNTIME_DIR/podman/podman.sock
+  export TESTCONTAINERS_RYUK_DISABLED=true
   ```
 
-  Put the two exports in your shell profile. The socket override lets Testcontainers' Ryuk cleanup container mount the Podman socket. If Ryuk still fails on your machine, set `TESTCONTAINERS_RYUK_DISABLED=true` (containers are then left behind if a test JVM crashes).
+  Put the two exports in your shell profile. Ryuk, Testcontainers' cleanup container, is disabled because it publishes a port on every network interface (see [Localhost only](#localhost-only)). Without it, Testcontainers stops its containers from a JVM shutdown hook. Only a killed test JVM leaves one behind; remove it with `podman ps` / `podman rm -f`.
 - **docker-compose** (Apache-2.0), which `podman compose` delegates to. Install the standalone binary from the [docker/compose releases](https://github.com/docker/compose/releases) into `~/.local/bin/docker-compose`, checking it against the release's `.sha256`. It talks to Podman through `DOCKER_HOST`. Only needed for the `compose.yaml` Postgres; `spring-boot:test-run` below works without it.
 
-### Troubleshooting
+## Localhost only
 
-- **`could not find free subnet from subnet pools`** from `podman compose up`: Podman's default pools for new networks are all inside `10.0.0.0/8`, so a host network using all of `10.0.0.0/8` (some Wi-Fi networks do) leaves none free. Point Podman at an unused range in `~/.config/containers/containers.conf`:
+Nothing the photos-api runs is reachable from other machines, which matters on shared networks such as public Wi-Fi:
 
-  ```toml
-  [network]
-  default_subnet_pools = [
-    {"base" = "172.30.0.0/16", "size" = 24},
-  ]
-  ```
+| What | Listens on | How |
+| --- | --- | --- |
+| photos-api | `127.0.0.1:4001` | `server.address: ${SERVER_ADDRESS:127.0.0.1}` in `application.yml` |
+| compose Postgres | `127.0.0.1:5432` | `network_mode: host` plus `listen_addresses=127.0.0.1`. No port is published and no container network is created. |
+| Testcontainers Postgres | `127.0.0.1:<random>` | `TestcontainersConfiguration` binds its published port to `127.0.0.1` |
+| Ryuk | not started | `TESTCONTAINERS_RYUK_DISABLED=true` |
 
-  Testcontainers isn't affected, since it uses Podman's existing default network.
+The ui repo's dev server and Storybook bind to `127.0.0.1` too. Check with `ss -ltn`: every dev port should show `127.0.0.1` (or `[::ffff:127.0.0.1]`), never `0.0.0.0`, `*` or `[::]`. Set `SERVER_ADDRESS=0.0.0.0` only where the api must be reachable, such as inside a future container image.
+
+The compose Postgres uses the host's network, which also sidesteps a Podman problem on networks that use all of `10.0.0.0/8` (some public Wi-Fi does). There, Podman can't find a free subnet for a compose network (`could not find free subnet from subnet pools`), because its default pools are all inside that range.
 
 ## Running it
 
@@ -52,6 +54,7 @@ All set in `src/main/resources/application.yml`, each with an env var override:
 
 | Env var | Default | What |
 | --- | --- | --- |
+| `SERVER_ADDRESS` | `127.0.0.1` | Address to listen on (loopback only by default) |
 | `PORT` | `4001` | HTTP port |
 | `DB_URL` | `jdbc:postgresql://localhost:5432/photos` | JDBC URL |
 | `DB_USERNAME` / `DB_PASSWORD` | `photos` / `photos` | Database credentials (match `compose.yaml`) |

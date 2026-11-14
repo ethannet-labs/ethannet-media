@@ -8,7 +8,9 @@ The ethannet **photos-api**: a Spring Boot 4 service in Java 25, built with Mave
 
 ## Commands
 
-Needs JDK 25 on `JAVA_HOME` and Podman. For Testcontainers, export `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock` and `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=$XDG_RUNTIME_DIR/podman/podman.sock` (the Podman socket is enabled with `systemctl --user enable --now podman.socket`).
+Needs JDK 25 on `JAVA_HOME`, Podman, and `docker-compose` (which `podman compose` delegates to). Export `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock` and `TESTCONTAINERS_RYUK_DISABLED=true` (the Podman socket is enabled with `systemctl --user enable --now podman.socket`).
+
+**Localhost only**: everything binds to `127.0.0.1` (api, compose Postgres via `network_mode: host`, Testcontainers' published ports, and Ryuk off), so nothing is reachable from the network. Keep it that way: never publish a container port without `127.0.0.1:`, and never default a listen address to `0.0.0.0`. See [docs/features/photos-api.md](docs/features/photos-api.md#localhost-only).
 
 - `podman compose up -d postgres` / `podman compose down` — local Postgres from `compose.yaml`
 - `./mvnw spring-boot:run` — run the api against the compose Postgres
@@ -22,7 +24,7 @@ Needs JDK 25 on `JAVA_HOME` and Podman. For Testcontainers, export `DOCKER_HOST=
 
 - **Contract first.** `openapi/photos-api.yaml` is the source of truth. `openapi-generator-maven-plugin` (`spring` generator, `interfaceOnly`, `skipDefaultInterface`, `useSpringBoot4`, `useJackson3`, `useTags`) generates one interface per tag (`net.ethannet.photos.api.HelloApi`) and the models (`net.ethannet.photos.api.model.*`) at build time; generated code is never committed or edited. Controllers implement the generated interfaces, so a drifting route or shape fails to compile. The ui vendors the spec at a release tag, so contract changes reach it only when a release is tagged. See [docs/features/api-contract.md](docs/features/api-contract.md).
 - **Feature packages** under `net.ethannet.photos` (`hello/`, later `photos/`, `albums/`...), each holding its controller, services or builders, and later entities and repositories. The flow is controller → service → repository: controllers only translate HTTP and delegate. Response-building logic is extracted into pure classes (e.g. `HelloResponseBuilder`, with an injected `Clock`) so plain JUnit can test it. Cross-cutting config lives in `config/` (`ClockConfig`, `CorsConfig` + `CorsProperties`).
-- **Configuration** is `src/main/resources/application.yml`; every environment-specific value reads an env var with a local default (`PORT`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `CORS_ALLOWED_ORIGINS`). Typed settings use `@ConfigurationProperties` records. CORS allows only `app.cors.allowed-origins` on `/api/**`.
+- **Configuration** is `src/main/resources/application.yml`; every environment-specific value reads an env var with a local default (`SERVER_ADDRESS` (default `127.0.0.1`), `PORT`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `CORS_ALLOWED_ORIGINS`). Typed settings use `@ConfigurationProperties` records. CORS allows only `app.cors.allowed-origins` on `/api/**`.
 - **Persistence**: Flyway owns the schema (`src/main/resources/db/migration/V<n>__<description>.sql`, no tables yet); Hibernate runs with `ddl-auto: validate` and `open-in-view: false`. Only `/actuator/health` is exposed, and it includes the database.
 - **Code style**: google-java-format via Spotless (`spotless:check` runs in `verify`). Tests mirror the main package layout.
 
@@ -52,9 +54,10 @@ The photos-api has one [semver](https://semver.org) version (`MAJOR.MINOR.PATCH`
 
 Every third-party dependency — Maven dependencies **and** Maven plugins — must be free, permissively licensed open source. Check its license (the `<licenses>` block in its published POM, or its parent POM, or its repository) before adding it.
 
-- **Allowed**: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, and 0BSD.
-- **Open question (awaiting the user's decision)**: some of Spring Boot's own transitive dependencies are EPL-2.0 (JUnit, AspectJ Weaver), EPL-2.0 or GPL-2.0-with-Classpath-Exception (Jakarta Annotations, Jakarta Transaction), or EPL-2.0 or LGPL-2.1 (Logback). See the 2026-11-12 plan's As built section for the full list.
-- **Not allowed without the user's explicit approval**: copyleft licenses (GPL, LGPL, AGPL, MPL, EUPL), "source-available" or non-commercial licenses (BSL, SSPL, Commons Clause, CC-BY-NC), packages with no license, and anything that requires a paid license (e.g. Flyway's paid editions; use only the Apache-2.0 community artifacts).
+- **Allowed**: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD, and EPL-2.0. EDL-1.0 (the Eclipse Distribution License) is the BSD-3-Clause text and counts as BSD-3-Clause.
+  - **EPL-2.0 only for unmodified dependencies.** Use EPL-2.0 libraries as published (e.g. JUnit, AspectJ Weaver, Logback). Never copy their source into this repo or patch them: changed EPL files must be published under EPL. If a jar or container image that bundles them is ever distributed, keep their license notices in it.
+  - **Dual-licensed dependencies** are allowed when one of their options is on this list. Treat them as licensed under that option (e.g. Jakarta Annotations, "EPL-2.0 or GPL-2.0 with Classpath Exception", is used under EPL-2.0; Logback, "EPL-2.0 or LGPL-2.1", under EPL-2.0).
+- **Not allowed without the user's explicit approval**: copyleft licenses (GPL, LGPL, AGPL, MPL, EUPL, EPL-1.0), "source-available" or non-commercial licenses (BSL, SSPL, Commons Clause, CC-BY-NC), packages with no license, and anything that requires a paid license (e.g. Flyway's paid editions; use only the Apache-2.0 community artifacts).
 - If a dependency's license isn't on the allowed list, or you're unsure about it, ask before adding it.
 - Pin plugin versions as properties in `pom.xml`. Dependency versions come from the Spring Boot parent's dependency management wherever it manages them.
 

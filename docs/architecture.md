@@ -39,7 +39,7 @@ See [API contract](features/api-contract.md) for the workflow and the rules for 
 
 ## Runtime picture
 
-Browser → Next.js ui (`ethannet-ui`, 3000) → photos-api (4001) → Postgres (5432). The ui's server components call `/api/*`; CORS allows the ui's origin for browser calls. `/actuator/health` reports `UP` only when the database is reachable, and the ui's e2e suite waits on it.
+Browser → Next.js ui (`ethannet-ui`, 3000) → photos-api (4001) → Postgres (5432). The ui's server components call `/api/*`; CORS allows the ui's origin for browser calls. `/actuator/health` reports `UP` only when the database is reachable, and the ui's e2e suite waits on it. Every process binds to `127.0.0.1` only, so nothing is reachable from the network (see [Photos API](features/photos-api.md#localhost-only)).
 
 Later plans add S3 for photo bytes (the browser uploads directly through presigned URLs) and an async worker for thumbnails and EXIF.
 
