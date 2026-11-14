@@ -1,4 +1,5 @@
-import type { HelloResponse, UiMessages } from "@ethannet/types";
+import type { UiMessages } from "@ethannet/messages";
+import type { HelloResponse } from "@ethannet/schema";
 
 /** Props for {@link HelloCard}: the api response plus the card's own copy. */
 export interface HelloCardProps extends HelloResponse {

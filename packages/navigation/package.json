@@ -14,10 +14,11 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@ethannet/messages": "workspace:*",
-    "@ethannet/types": "workspace:*",
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@ethannet/messages": "workspace:*"
   }
 }

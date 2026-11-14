@@ -11,9 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "@ethannet/types": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.10.2",
     "tsup": "^8.3.5",

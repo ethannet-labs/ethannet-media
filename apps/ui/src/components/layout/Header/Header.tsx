@@ -1,4 +1,5 @@
-import type { NavLink, UiMessages } from "@ethannet/types";
+import type { NavLink } from "@/types";
+import type { UiMessages } from "@ethannet/messages";
 import { Logo } from "../Logo";
 import { MobileMenu } from "../MobileMenu";
 import { NavLinks } from "../NavLinks";

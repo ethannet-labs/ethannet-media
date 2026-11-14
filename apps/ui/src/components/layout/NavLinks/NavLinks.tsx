@@ -1,4 +1,4 @@
-import type { NavLink } from "@ethannet/types";
+import type { NavLink } from "@/types";
 import Link from "next/link";
 import styles from "./NavLinks.module.css";
 

@@ -1,4 +1,4 @@
-import type { HelloResponse } from "@ethannet/types";
+import type { HelloResponse } from "@ethannet/schema";
 import { Router } from "express";
 
 export function buildHelloResponse(): HelloResponse {

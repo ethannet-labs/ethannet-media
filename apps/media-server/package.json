@@ -12,7 +12,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ethannet/types": "workspace:*",
     "express": "^4.21.2",
     "unique-names-generator": "^4.7.1"
   },
