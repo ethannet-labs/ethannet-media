@@ -1,40 +1,36 @@
 # ethannet
 
-A fullstack TypeScript monorepo managed with pnpm workspaces.
+The ethannet **photos-api**: a Spring Boot 4 service (Java 25, Maven) backed by Postgres. The UI that calls it lives in its own repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui).
 
 ## Layout
 
-- [apps/api](apps/api) — Express API server
-- [apps/ui](apps/ui) — Next.js app
-- [apps/core](apps/core) — Node.js app
-- [apps/media-server](apps/media-server) — Express server that serves media files to clients
-- [apps/e2e](apps/e2e) — Playwright end-to-end tests covering api + ui together
-- [packages/types](packages/types) — TypeScript types shared between api and ui
+- [openapi/photos-api.yaml](openapi/photos-api.yaml) — the API contract, source of truth for both repos
+- [src/main/java/net/ethannet/photos](src/main/java/net/ethannet/photos) — the application, in feature packages
+- [src/main/resources](src/main/resources) — `application.yml` and Flyway migrations
+- [compose.yaml](compose.yaml) — local Postgres
 - [docs](docs) — documentation, including plans
 
-See [docs/architecture.md](docs/architecture.md) for how the pieces fit together, and [docs/releasing.md](docs/releasing.md) for the branch, versioning and release workflow.
+See [docs/architecture.md](docs/architecture.md) for how the pieces fit together, [docs/features/photos-api.md](docs/features/photos-api.md) for running, configuring and testing the service, [docs/features/api-contract.md](docs/features/api-contract.md) for the contract workflow, and [docs/releasing.md](docs/releasing.md) for branches, versions and releases.
 
 ## Getting started
 
+Needs JDK 25 and Podman (setup in [docs/features/photos-api.md](docs/features/photos-api.md#prerequisites)).
+
 ```
-pnpm install
-pnpm dev
+podman compose up -d postgres
+./mvnw spring-boot:run
 ```
 
-This starts the api on http://localhost:4001 and the ui on http://localhost:3000.
+Or, with a throwaway Testcontainers Postgres and no compose: `./mvnw spring-boot:test-run`. The api listens on http://localhost:4001.
 
-## Scripts
+## Commands
 
-| Script | Description |
+| Command | Description |
 | --- | --- |
-| `pnpm dev` | Run api + ui in dev mode |
-| `pnpm build` | Build all packages |
-| `pnpm start` | Run built api + ui |
-| `pnpm typecheck` | Typecheck all packages |
-| `pnpm test` | Run unit tests (Vitest) in all packages |
-| `pnpm test:e2e` | Run Playwright end-to-end tests |
-| `pnpm storybook` | Run Storybook for the ui's components |
-| `pnpm lint` | Lint the whole repo with Biome |
-| `pnpm format` | Format the whole repo with Biome |
-| `pnpm changeset` | Add a changeset describing the current branch's change |
-| `pnpm version-packages` | Release only: apply pending changesets to versions and changelogs |
+| `./mvnw spring-boot:run` | Run the api against the compose Postgres |
+| `./mvnw spring-boot:test-run` | Run the api against a throwaway Testcontainers Postgres |
+| `./mvnw test` | Run all tests (unit, web slice, Testcontainers) |
+| `./mvnw test -Dtest=HelloControllerTest` | Run one test class |
+| `./mvnw verify` | Tests, formatting check and jar build |
+| `./mvnw spotless:apply` | Format the Java code |
+| `podman compose up -d postgres` / `podman compose down` | Start / stop local Postgres |

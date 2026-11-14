@@ -1,7 +1,7 @@
 # Plan: Split into a UI repo and a Spring Boot photos-api repo
 
 - **Date:** 2026-11-12 (revised 2026-11-14: two repos instead of one)
-- **Status:** In progress (steps A1–A2 done and committed on `feature/spring-boot-photos-api`)
+- **Status:** In progress. Parts A and C are done in `ethannet` on `feature/photos-api`. Part B is done in `ethannet-ui` on `feature/remove-node-backends`. Waiting on the license question below, a compose provider, and the first release (C6).
 - **Repos:**
   - **`ethannet`** (this repo, `github.com/Ethan-S-Evans/ethannet`): becomes the Spring Boot **photos-api**. Its history is kept.
   - **`ethannet-ui`** (new): the Next.js UI monorepo, created from a clone of this repo so its history is kept too.
@@ -220,3 +220,29 @@ The original plan put the Spring Boot app in `apps/photos-api` inside this pnpm 
 - Biome ignores `packages/schema/src/generated/**` entirely (format and lint), not just formatting.
 - `@ethannet/navigation` now lists `@ethannet/messages` under `dependencies` rather than `devDependencies`, because its exported `NavLinkId` and `SocialLinkId` types are derived from `UiMessages`.
 - `packages/types` was deleted before the Node apps were removed. To keep typecheck green in between, `apps/api` imports `HelloResponse` from `@ethannet/schema`, and `apps/media-server` keeps its media types locally in `src/types.ts`. Both apps are deleted in `ethannet-ui` step B2, and this repo drops them in C1.
+
+### Part C (ethannet) differences
+
+- Branch: Part C was built on a new `feature/photos-api` branch, because `feature/spring-boot-photos-api` had already been merged into `dev` as the split point.
+- Versions: Spring Boot **4.1.2** (4.2 was only at RC2), Maven 3.10.0 through wrapper 3.3.4, openapi-generator-maven-plugin **7.27.0**, spotless-maven-plugin 3.11.0, google-java-format 2.0.0, and Postgres **18** (Testcontainers and `compose.yaml`). Package `net.ethannet.photos`, version `0.1.0-SNAPSHOT`. The spec's `info.version` is `0.1.0`.
+- The generator worked with `useSpringBoot4` and `useJackson3`, so there was no fallback to models only. Extra options: `skipDefaultInterface` (abstract methods, so a missing operation fails to compile), `annotationLibrary=none`, `documentationProvider=none`, `openApiNullable=false` (no Swagger or `jackson-databind-nullable` dependencies) and `hideGenerationTimestamp` (reproducible output).
+- `HelloResponseBuilder` takes an injected `Clock` (from `ClockConfig`), so its test uses `Clock.fixed`. The message is "Hello from the photos API!". There's no service layer for hello, since there's no logic beyond the builder.
+- CORS is in `CorsConfig` with a `CorsProperties` record (`app.cors.allowed-origins`, env `CORS_ALLOWED_ORIGINS`), applied to `/api/**`. `HelloControllerTest` covers both an allowed and a rejected origin.
+- `PhotosApiSmokeTest` (the integration test) checks that Flyway validates with nothing pending, that `/actuator/health` is `UP`, and that `/api/hello` serves the real greeting.
+- Podman: the user socket was enabled (`systemctl --user enable --now podman.socket`). Testcontainers works with `DOCKER_HOST` and `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` set, and with Ryuk still enabled.
+- **No compose provider is installed**, so `podman compose up` hasn't been run yet. `compose.yaml` is written but untested. For e2e, the api was run with `./mvnw spring-boot:test-run` (Testcontainers Postgres), and the docs give this as a no-compose option.
+- **Verified:** `./mvnw verify` passes (8 tests and the Spotless check). With the api running, `ethannet-ui`'s `pnpm test:e2e` passes all 12 tests, including `home.spec.ts` rendering the Spring Boot greeting.
+- Docs: `docs/features/ui-messages.md` and `site-layout.md` were removed here (they live in `ethannet-ui`). Older plans are kept as history.
+
+### Open: transitive licenses outside the allow-list
+
+A license audit of every resolved dependency found these, all pulled in by the Spring Boot starters this plan chose:
+
+| Dependency | License | Comes from |
+| --- | --- | --- |
+| JUnit Jupiter / Platform 6.0.3 | EPL-2.0 | test starters (test scope only) |
+| AspectJ Weaver 1.9.25.1 | EPL-2.0 | `spring-boot-starter-data-jpa` |
+| Jakarta Annotations 3.0.0, Jakarta Transaction 2.0.1 | EPL-2.0 or GPL-2.0 with Classpath Exception | Spring / JPA |
+| Logback 1.5.38 | EPL-2.0 or LGPL-2.1 | `spring-boot-starter-logging` |
+
+EDL-1.0 libraries (JAXB, Jakarta Activation, istack, and Jakarta Persistence, which is dual EDL/EPL) carry the BSD-3-Clause text, so they fit the allow-list. The audit used `license-maven-plugin`, which is itself LGPL-3.0, so it was run once ad hoc and not added to the build. This needs a decision from the user before `feature/photos-api` merges.

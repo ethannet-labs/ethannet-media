@@ -1,0 +1,21 @@
+# Local development only. Start with `podman compose up -d postgres`.
+# Credentials match the defaults in src/main/resources/application.yml.
+services:
+  postgres:
+    image: docker.io/library/postgres:18
+    environment:
+      POSTGRES_DB: photos
+      POSTGRES_USER: photos
+      POSTGRES_PASSWORD: photos
+    ports:
+      - "5432:5432"
+    volumes:
+      - photos-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U photos -d photos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  photos-db:
