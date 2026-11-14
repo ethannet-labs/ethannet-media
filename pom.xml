@@ -14,7 +14,7 @@
 	<version>0.1.0-SNAPSHOT</version>
 	<name>photos-api</name>
 	<description>ethannet photos API</description>
-	<url>https://github.com/Ethan-S-Evans/ethannet</url>
+	<url>https://github.com/Ethan-S-Evans/ethannet-media</url>
 	<licenses>
 		<license>
 			<name>Apache-2.0</name>

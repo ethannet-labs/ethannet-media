@@ -6,10 +6,10 @@ ethannet is split across two repos, one language each:
 
 | Repo | What it is | Port |
 | --- | --- | --- |
-| **ethannet** (this repo) | The Spring Boot **photos-api** and its Postgres database. Java 25, Maven. It owns the API contract. | photos-api 4001, Postgres 5432 |
+| **ethannet-media** (this repo) | The Spring Boot **photos-api** and its Postgres database. Java 25, Maven. It owns the API contract. | photos-api 4001, Postgres 5432 |
 | [**ethannet-ui**](https://github.com/Ethan-S-Evans/ethannet-ui) | The Next.js UI, Storybook and the Playwright e2e suite. TypeScript, pnpm. | ui 3000, Storybook 6006 |
 
-Until November 2026 this repo was an all-TypeScript pnpm monorepo, with an Express api, a media-server and the UI together. It was split so that each repo has one toolchain, its own version and release cycle, and its own CI. The backend kept this repo, since it's the long-lived service the photo features grow into, and the UI moved to `ethannet-ui` with its history. The old TypeScript code is still in this repo's git history. The plan behind the split is [2026-11-12-spring-boot-photos-api](plans/2026-11-12-spring-boot-photos-api.md).
+Until November 2026 this repo was an all-TypeScript pnpm monorepo, with an Express api, a media-server and the UI together. It was split so that each repo has one toolchain, its own version and release cycle, and its own CI. The backend kept this repo, since it's the long-lived service the photo features grow into, and the UI moved to `ethannet-ui` with its history. The old TypeScript code is still in this repo's git history. The repo was called `ethannet` until 2026-11-14, when it was renamed `ethannet-media`, locally and on GitHub. GitHub redirects the old URL. The plan behind the split is [2026-11-12-spring-boot-photos-api](plans/2026-11-12-spring-boot-photos-api.md).
 
 ## Why Spring Boot and Postgres
 

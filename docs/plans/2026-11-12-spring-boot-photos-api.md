@@ -1,7 +1,7 @@
 # Plan: Split into a UI repo and a Spring Boot photos-api repo
 
 - **Date:** 2026-11-12 (revised 2026-11-14: two repos instead of one)
-- **Status:** In progress. Parts A and C are done in `ethannet` on `feature/photos-api`. Part B is done in `ethannet-ui` on `feature/remove-node-backends`. Waiting on the first release (C6).
+- **Status:** In progress. Parts A, B and C are done and merged. Waiting on the first release (C6). The backend repo is now `ethannet-media` (see [Rename](#rename-to-ethannet-media-2026-11-14)).
 - **Repos:**
   - **`ethannet`** (this repo, `github.com/Ethan-S-Evans/ethannet`): becomes the Spring Boot **photos-api**. Its history is kept.
   - **`ethannet-ui`** (new): the Next.js UI monorepo, created from a clone of this repo so its history is kept too.
@@ -254,3 +254,7 @@ A license audit of every resolved dependency found these, all pulled in by the S
 | Logback 1.5.38 | EPL-2.0 or LGPL-2.1 | `spring-boot-starter-logging` |
 
 EDL-1.0 libraries (JAXB, Jakarta Activation, istack, and Jakarta Persistence, which is dual EDL/EPL) carry the BSD-3-Clause text, so they fit the allow-list. The audit used `license-maven-plugin`, which is itself LGPL-3.0, so it was run once ad hoc and not added to the build. **Decision (2026-11-14):** the user amended the license policy in both repos' `CLAUDE.md` to allow EPL-2.0 for unmodified dependencies, and dual-licensed dependencies under an allowed option. All of the above are now within policy.
+
+### Rename to ethannet-media (2026-11-14)
+
+The photos-api repo was renamed from `ethannet` to **`ethannet-media`**, both on GitHub (`Ethan-S-Evans/ethannet-media`; GitHub redirects the old name) and locally. Both repos now live side by side in a shared folder, `~/git/ethannet/` (`ethannet-media/` and `ethannet-ui/`). Wherever this plan says `ethannet` for the backend repo, read `ethannet-media`. Live docs, the ui's `photosApi.repo`, and the `../ethannet-media` paths were updated. The service and artifact are still called `photos-api`.

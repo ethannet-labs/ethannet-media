@@ -1,4 +1,4 @@
-# ethannet
+# ethannet-media
 
 The ethannet **photos-api**: a Spring Boot 4 service (Java 25, Maven) backed by Postgres. The UI that calls it lives in its own repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui).
 
