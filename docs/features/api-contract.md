@@ -1,6 +1,6 @@
 # API contract (owner side)
 
-This repo owns the contract between the media-api and the ui: an OpenAPI 3.1 spec at `openapi/media-api.yaml`. It's the source of truth. The api's Java interfaces are generated from it at build time, and the ui ([ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui)) vendors a copy at a release tag and generates TypeScript types from that. The plan this was built from is [2026-11-12-spring-boot-photos-api](../plans/2026-11-12-spring-boot-photos-api.md). See also [Architecture](../architecture.md) and [Media API](media-api.md).
+This repo owns the contract between the media-api and the ui: an OpenAPI 3.1 spec at `openapi/media-api.yaml`. It's the source of truth. The api's Java interfaces are generated from it at build time, and the ui ([ethannet-ui](https://github.com/ethannet-labs/ethannet-ui)) vendors a copy at a release tag and generates TypeScript types from that. The plan this was built from is [2026-11-12-spring-boot-photos-api](../plans/2026-11-12-spring-boot-photos-api.md). See also [Architecture](../architecture.md) and [Media API](media-api.md).
 
 ## How the Java side is generated
 

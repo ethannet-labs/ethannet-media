@@ -21,7 +21,7 @@ The media-api has one [semver](https://semver.org) version, `MAJOR.MINOR.PATCH`,
 - `<version>` in `pom.xml` (the jar is `target/media-api-<version>.jar`). Between releases, `dev` carries the next version with `-SNAPSHOT`, e.g. `0.2.0-SNAPSHOT`.
 - `info.version` in `openapi/media-api.yaml`, which the ui sees when it syncs the contract.
 
-The ui repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui), has its own version (managed with Changesets) and doesn't follow this one.
+The ui repo, [ethannet-ui](https://github.com/ethannet-labs/ethannet-ui), has its own version (managed with Changesets) and doesn't follow this one.
 
 | Bump | When |
 | --- | --- |

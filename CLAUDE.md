@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-The ethannet **media-api**: a Spring Boot 4 service in Java 25, built with Maven (through the wrapper, `./mvnw`) and backed by Postgres, on port 4001. It's a plain Maven project at the repo root (no Node tooling). It owns the OpenAPI contract in `openapi/media-api.yaml`. The Next.js UI that calls it lives in a separate repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui), checked out locally at `../ethannet-ui`. See [docs/architecture.md](docs/architecture.md) for the rationale behind the setup, [docs/features/media-api.md](docs/features/media-api.md) for running and testing it, [docs/features/api-contract.md](docs/features/api-contract.md) for the contract workflow, and [docs/releasing.md](docs/releasing.md) for the branch and release workflow; implementation plans live in [docs/plans/](docs/plans/).
+The ethannet **media-api**: a Spring Boot 4 service in Java 25, built with Maven (through the wrapper, `./mvnw`) and backed by Postgres, on port 4001. It's a plain Maven project at the repo root (no Node tooling). It owns the OpenAPI contract in `openapi/media-api.yaml`. The Next.js UI that calls it lives in a separate repo, [ethannet-ui](https://github.com/ethannet-labs/ethannet-ui), checked out locally at `../ethannet-ui`. See [docs/architecture.md](docs/architecture.md) for the rationale behind the setup, [docs/features/media-api.md](docs/features/media-api.md) for running and testing it, [docs/features/api-contract.md](docs/features/api-contract.md) for the contract workflow, and [docs/releasing.md](docs/releasing.md) for the branch and release workflow; implementation plans live in [docs/plans/](docs/plans/).
 
 ## Commands
 

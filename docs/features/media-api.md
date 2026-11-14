@@ -93,4 +93,4 @@ Each feature gets its own package. Within it, the flow is **controller → servi
 | Web slice (`@WebMvcTest`) | `HelloControllerTest` | Status, content type and exact JSON shape against the contract (builder mocked with `@MockitoBean`), plus CORS: the configured origin is allowed and others get `403`. |
 | Integration (`@SpringBootTest` + Testcontainers) | `MediaApiSmokeTest` | The whole app against real Postgres 18: Flyway validates with nothing pending, `/actuator/health` is `UP`, and `/api/hello` serves the real greeting. |
 
-End to end, the ui repo's Playwright suite renders the greeting from a running media-api (`tests/home.spec.ts` in [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui)).
+End to end, the ui repo's Playwright suite renders the greeting from a running media-api (`tests/home.spec.ts` in [ethannet-ui](https://github.com/ethannet-labs/ethannet-ui)).
