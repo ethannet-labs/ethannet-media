@@ -50,6 +50,10 @@ The photos-api has one [semver](https://semver.org) version (`MAJOR.MINOR.PATCH`
 - **Pre-1.0**: the version stays on `0.y.z` until the user decides it's ready for `1.0.0`. Until then, breaking changes bump the minor version.
 - **Releasing**: only when the user asks.
 
+### License
+
+This repo's own code is licensed under **Apache-2.0** (`LICENSE`, with the copyright line in `NOTICE`, and declared in `pom.xml`'s `<licenses>`). New files need no per-file header. Don't add code copied from elsewhere unless its license allows relicensing under Apache-2.0, or keep it with its own notice. Any distributed build (a jar or container image) must include `LICENSE`, `NOTICE` and the license notices of the third-party dependencies it bundles.
+
 ### External dependencies
 
 Every third-party dependency — Maven dependencies **and** Maven plugins — must be free, permissively licensed open source. Check its license (the `<licenses>` block in its published POM, or its parent POM, or its repository) before adding it.

@@ -34,3 +34,7 @@ Or, with a throwaway Testcontainers Postgres and no compose: `./mvnw spring-boot
 | `./mvnw verify` | Tests, formatting check and jar build |
 | `./mvnw spotless:apply` | Format the Java code |
 | `podman compose up -d postgres` / `podman compose down` | Start / stop local Postgres |
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE). Third-party dependencies keep their own licenses; see the license policy in [CLAUDE.md](CLAUDE.md#external-dependencies).
