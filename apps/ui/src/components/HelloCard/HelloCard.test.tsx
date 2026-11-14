@@ -1,4 +1,4 @@
-import type { UiMessages } from "@ethannet/types";
+import type { UiMessages } from "@ethannet/messages";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { HelloCard } from "./HelloCard";

@@ -1,4 +1,4 @@
-import type { UiMessages } from "@ethannet/types";
+import type { UiMessages } from "@ethannet/messages";
 import Link from "next/link";
 import styles from "./Logo.module.css";
 

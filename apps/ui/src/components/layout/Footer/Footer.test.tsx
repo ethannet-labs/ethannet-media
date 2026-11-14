@@ -1,4 +1,5 @@
-import type { NavLink, SocialLink, UiMessages } from "@ethannet/types";
+import type { NavLink, SocialLink } from "@/types";
+import type { UiMessages } from "@ethannet/messages";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Footer } from "./Footer";

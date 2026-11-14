@@ -1,4 +1,4 @@
-import { MediaFile } from "@ethannet/types"
+import type { MediaFile } from "../types";
 import { PathLike } from "fs"
 
 export type MediaType = "photo" | "audio" | "video" | "text";

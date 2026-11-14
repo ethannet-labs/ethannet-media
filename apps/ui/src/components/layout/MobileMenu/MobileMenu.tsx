@@ -1,6 +1,7 @@
 "use client";
 
-import type { NavLink, UiMessages } from "@ethannet/types";
+import type { NavLink } from "@/types";
+import type { UiMessages } from "@ethannet/messages";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NavLinks } from "../NavLinks";
 import styles from "./MobileMenu.module.css";

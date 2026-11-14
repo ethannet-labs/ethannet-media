@@ -1,4 +1,6 @@
-import type { LinkConfig, NavLinkId, SocialLinkId } from "@ethannet/types";
+import type { LinkConfig, NavLinkId, SocialLinkId } from "./types";
+
+export type { LinkConfig, NavLinkId, SocialLinkId } from "./types";
 
 export { resolveLinks } from "./resolveLinks";
 

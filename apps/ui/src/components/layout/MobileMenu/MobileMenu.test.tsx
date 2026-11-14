@@ -1,4 +1,5 @@
-import type { NavLink, UiMessages } from "@ethannet/types";
+import type { NavLink } from "@/types";
+import type { UiMessages } from "@ethannet/messages";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@ethannet/messages",
     "@ethannet/navigation",
-    "@ethannet/types",
+    "@ethannet/schema",
   ],
 };
 

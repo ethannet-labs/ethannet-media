@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { MediaFileSummary } from "@ethannet/types";
 import { Router } from "express";
+import type { MediaFileSummary } from "../types";
 
 export function resolveMediaDir(): string {
   return process.env.MEDIA_DIR
@@ -9,7 +9,9 @@ export function resolveMediaDir(): string {
     : path.resolve(process.cwd(), "media");
 }
 
-export async function listMediaFiles(mediaDir: string): Promise<MediaFileSummary[]> {
+export async function listMediaFiles(
+  mediaDir: string,
+): Promise<MediaFileSummary[]> {
   const entries = await fs.readdir(mediaDir, { withFileTypes: true });
   const files = await Promise.all(
     entries

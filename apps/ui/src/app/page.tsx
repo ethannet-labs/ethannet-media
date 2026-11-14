@@ -1,6 +1,6 @@
 import { HelloCard } from "@/components/HelloCard";
 import { messages } from "@ethannet/messages";
-import type { HelloResponse } from "@ethannet/types";
+import type { HelloResponse } from "@ethannet/schema";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001";
 

@@ -1,5 +1,7 @@
-import type { UiMessages } from "@ethannet/types";
 import en from "../messages/en.json";
+import type { UiMessages } from "./types";
+
+export type { UiMessages } from "./types";
 
 /**
  * The ui's English copy. Annotating it as {@link UiMessages} makes `tsc` fail if

@@ -1,4 +1,4 @@
-import type { LinkConfig } from "@ethannet/types";
+import type { LinkConfig } from "./types";
 
 /**
  * Turns configured links into renderable ones by looking up each link's label
