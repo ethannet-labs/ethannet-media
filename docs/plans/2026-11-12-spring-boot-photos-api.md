@@ -258,3 +258,7 @@ EDL-1.0 libraries (JAXB, Jakarta Activation, istack, and Jakarta Persistence, wh
 ### Rename to ethannet-media (2026-11-14)
 
 The photos-api repo was renamed from `ethannet` to **`ethannet-media`**, both on GitHub (`Ethan-S-Evans/ethannet-media`; GitHub redirects the old name) and locally. Both repos now live side by side in a shared folder, `~/git/ethannet/` (`ethannet-media/` and `ethannet-ui/`). Wherever this plan says `ethannet` for the backend repo, read `ethannet-media`. Live docs, the ui's `photosApi.repo`, and the `../ethannet-media` paths were updated. The service and artifact are still called `photos-api`.
+
+### C6: first release (2026-11-14)
+
+photos-api `v0.1.0` was released with the steps in [Releasing](../releasing.md): `pom.xml` set to `0.1.0` (the spec's `info.version` was already `0.1.0`), `./mvnw verify`, `dev` merged into `main`, tagged `v0.1.0` and pushed, then `dev` moved to `0.2.0-SNAPSHOT`. `ethannet-ui` then ran `sync:api v0.1.0`. Both repos are licensed under Apache-2.0 from this release on.
