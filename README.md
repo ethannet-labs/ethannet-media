@@ -1,20 +1,20 @@
 # ethannet-media
 
-The ethannet **photos-api**: a Spring Boot 4 service (Java 25, Maven) backed by Postgres. The UI that calls it lives in its own repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui).
+The ethannet **media-api**: a Spring Boot 4 service (Java 25, Maven) backed by Postgres. The UI that calls it lives in its own repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui).
 
 ## Layout
 
-- [openapi/photos-api.yaml](openapi/photos-api.yaml) — the API contract, source of truth for both repos
-- [src/main/java/net/ethannet/photos](src/main/java/net/ethannet/photos) — the application, in feature packages
+- [openapi/media-api.yaml](openapi/media-api.yaml) — the API contract, source of truth for both repos
+- [src/main/java/net/ethannet/media](src/main/java/net/ethannet/media) — the application, in feature packages
 - [src/main/resources](src/main/resources) — `application.yml` and Flyway migrations
 - [compose.yaml](compose.yaml) — local Postgres
 - [docs](docs) — documentation, including plans
 
-See [docs/architecture.md](docs/architecture.md) for how the pieces fit together, [docs/features/photos-api.md](docs/features/photos-api.md) for running, configuring and testing the service, [docs/features/api-contract.md](docs/features/api-contract.md) for the contract workflow, and [docs/releasing.md](docs/releasing.md) for branches, versions and releases.
+See [docs/architecture.md](docs/architecture.md) for how the pieces fit together, [docs/features/media-api.md](docs/features/media-api.md) for running, configuring and testing the service, [docs/features/api-contract.md](docs/features/api-contract.md) for the contract workflow, and [docs/releasing.md](docs/releasing.md) for branches, versions and releases.
 
 ## Getting started
 
-Needs JDK 25 and Podman (setup in [docs/features/photos-api.md](docs/features/photos-api.md#prerequisites)).
+Needs JDK 25 and Podman (setup in [docs/features/media-api.md](docs/features/media-api.md#prerequisites)).
 
 ```
 podman compose up -d postgres

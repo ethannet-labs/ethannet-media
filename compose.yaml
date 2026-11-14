@@ -10,16 +10,16 @@ services:
     network_mode: host
     command: ["postgres", "-c", "listen_addresses=127.0.0.1", "-c", "port=5432"]
     environment:
-      POSTGRES_DB: photos
-      POSTGRES_USER: photos
-      POSTGRES_PASSWORD: photos
+      POSTGRES_DB: media
+      POSTGRES_USER: media
+      POSTGRES_PASSWORD: media
     volumes:
-      - photos-db:/var/lib/postgresql
+      - media-db:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U photos -d photos"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U media -d media"]
       interval: 5s
       timeout: 3s
       retries: 10
 
 volumes:
-  photos-db:
+  media-db:

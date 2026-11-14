@@ -16,16 +16,16 @@ Nothing is committed directly to `main` or `dev`.
 
 ## Versions
 
-The photos-api has one [semver](https://semver.org) version, `MAJOR.MINOR.PATCH`, in two places that must match at release:
+The media-api has one [semver](https://semver.org) version, `MAJOR.MINOR.PATCH`, in two places that must match at release:
 
-- `<version>` in `pom.xml` (the jar is `target/photos-api-<version>.jar`). Between releases, `dev` carries the next version with `-SNAPSHOT`, e.g. `0.2.0-SNAPSHOT`.
-- `info.version` in `openapi/photos-api.yaml`, which the ui sees when it syncs the contract.
+- `<version>` in `pom.xml` (the jar is `target/media-api-<version>.jar`). Between releases, `dev` carries the next version with `-SNAPSHOT`, e.g. `0.2.0-SNAPSHOT`.
+- `info.version` in `openapi/media-api.yaml`, which the ui sees when it syncs the contract.
 
 The ui repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui), has its own version (managed with Changesets) and doesn't follow this one.
 
 | Bump | When |
 | --- | --- |
-| **major** | A breaking change to the contract in `openapi/photos-api.yaml` (see [API contract](features/api-contract.md#changing-the-contract)), or a large overhaul. |
+| **major** | A breaking change to the contract in `openapi/media-api.yaml` (see [API contract](features/api-contract.md#changing-the-contract)), or a large overhaul. |
 | **minor** | A new endpoint or feature that doesn't break anything. |
 | **patch** | A bug fix or a small internal change. |
 
@@ -56,7 +56,7 @@ Only when the owner decides to release.
    git switch dev && git pull
    git switch -c feature/release-vX.Y.Z
    ./mvnw versions:set -DnewVersion=X.Y.Z -DgenerateBackupPoms=false
-   # and set info.version: X.Y.Z in openapi/photos-api.yaml
+   # and set info.version: X.Y.Z in openapi/media-api.yaml
    ./mvnw verify
    ```
 

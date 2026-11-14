@@ -9,11 +9,11 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>net.ethannet</groupId>
-	<artifactId>photos-api</artifactId>
-	<!-- The release version. Keep it in step with info.version in openapi/photos-api.yaml; see docs/releasing.md. -->
+	<artifactId>media-api</artifactId>
+	<!-- The release version. Keep it in step with info.version in openapi/media-api.yaml; see docs/releasing.md. -->
 	<version>0.2.0-SNAPSHOT</version>
-	<name>photos-api</name>
-	<description>ethannet photos API</description>
+	<name>media-api</name>
+	<description>ethannet media API</description>
 	<url>https://github.com/Ethan-S-Evans/ethannet-media</url>
 	<licenses>
 		<license>
@@ -117,15 +117,15 @@
 				<version>${openapi-generator.version}</version>
 				<executions>
 					<execution>
-						<id>photos-api</id>
+						<id>media-api</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/openapi/photos-api.yaml</inputSpec>
+							<inputSpec>${project.basedir}/openapi/media-api.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>net.ethannet.photos.api</apiPackage>
-							<modelPackage>net.ethannet.photos.api.model</modelPackage>
+							<apiPackage>net.ethannet.media.api</apiPackage>
+							<modelPackage>net.ethannet.media.api.model</modelPackage>
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
 							<generateApiDocumentation>false</generateApiDocumentation>

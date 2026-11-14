@@ -1,11 +1,11 @@
 spring:
   application:
-    name: photos-api
+    name: media-api
   datasource:
     # Defaults match compose.yaml. Override per environment with env vars.
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/photos}
-    username: ${DB_USERNAME:photos}
-    password: ${DB_PASSWORD:photos}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/media}
+    username: ${DB_USERNAME:media}
+    password: ${DB_PASSWORD:media}
   jpa:
     open-in-view: false
     hibernate:

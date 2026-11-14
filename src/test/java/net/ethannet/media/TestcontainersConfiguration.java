@@ -1,4 +1,4 @@
-package net.ethannet.photos;
+package net.ethannet.media;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
@@ -10,7 +10,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * A throwaway Postgres for tests and {@code TestPhotosApiApplication}. Same major as compose.yaml.
+ * A throwaway Postgres for tests and {@code TestMediaApiApplication}. Same major as compose.yaml.
  *
  * <p>Its port is published on 127.0.0.1 only (on a random free port), so the database is never
  * reachable from the network.

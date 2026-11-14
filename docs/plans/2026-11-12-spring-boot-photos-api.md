@@ -262,3 +262,7 @@ The photos-api repo was renamed from `ethannet` to **`ethannet-media`**, both on
 ### C6: first release (2026-11-14)
 
 photos-api `v0.1.0` was released with the steps in [Releasing](../releasing.md): `pom.xml` set to `0.1.0` (the spec's `info.version` was already `0.1.0`), `./mvnw verify`, `dev` merged into `main`, tagged `v0.1.0` and pushed, then `dev` moved to `0.2.0-SNAPSHOT`. `ethannet-ui` then ran `sync:api v0.1.0`. Both repos are licensed under Apache-2.0 from this release on.
+
+### Rename to media-api (2026-11-14, after v0.1.0)
+
+The service was renamed from **photos-api** to **media-api**. The artifact is now `media-api`, the Java package `net.ethannet.media` (`MediaApiApplication`, `MediaApiSmokeTest`, `TestMediaApiApplication`), the spec `openapi/media-api.yaml` (title `ethannet media-api`), the feature doc [Media API](../features/media-api.md), and `spring.application.name: media-api`. The dev database, user and password are now `media`, with a `media-db` volume. The hello message is now "Hello from the media API!". This plan keeps its file name and original wording. The `v0.1.0` tag still has the old names; the first release with the new names will be `v0.2.0`.

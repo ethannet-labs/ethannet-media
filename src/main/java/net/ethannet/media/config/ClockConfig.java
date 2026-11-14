@@ -1,4 +1,4 @@
-package net.ethannet.photos.config;
+package net.ethannet.media.config;
 
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;

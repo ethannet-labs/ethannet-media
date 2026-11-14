@@ -1,7 +1,7 @@
-package net.ethannet.photos.hello;
+package net.ethannet.media.hello;
 
-import net.ethannet.photos.api.HelloApi;
-import net.ethannet.photos.api.model.HelloResponse;
+import net.ethannet.media.api.HelloApi;
+import net.ethannet.media.api.model.HelloResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
