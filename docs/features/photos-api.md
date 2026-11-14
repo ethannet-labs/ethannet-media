@@ -14,7 +14,20 @@ The Spring Boot service behind the ethannet ui. Today it serves one endpoint, `G
   ```
 
   Put the two exports in your shell profile. The socket override lets Testcontainers' Ryuk cleanup container mount the Podman socket. If Ryuk still fails on your machine, set `TESTCONTAINERS_RYUK_DISABLED=true` (containers are then left behind if a test JVM crashes).
-- **A compose provider** for `podman compose` (it delegates to `docker-compose` or `podman-compose`). Only needed for the `compose.yaml` Postgres; `spring-boot:test-run` below works without one.
+- **docker-compose** (Apache-2.0), which `podman compose` delegates to. Install the standalone binary from the [docker/compose releases](https://github.com/docker/compose/releases) into `~/.local/bin/docker-compose`, checking it against the release's `.sha256`. It talks to Podman through `DOCKER_HOST`. Only needed for the `compose.yaml` Postgres; `spring-boot:test-run` below works without it.
+
+### Troubleshooting
+
+- **`could not find free subnet from subnet pools`** from `podman compose up`: Podman's default pools for new networks are all inside `10.0.0.0/8`, so a host network using all of `10.0.0.0/8` (some Wi-Fi networks do) leaves none free. Point Podman at an unused range in `~/.config/containers/containers.conf`:
+
+  ```toml
+  [network]
+  default_subnet_pools = [
+    {"base" = "172.30.0.0/16", "size" = 24},
+  ]
+  ```
+
+  Testcontainers isn't affected, since it uses Podman's existing default network.
 
 ## Running it
 
