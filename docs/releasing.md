@@ -1,6 +1,6 @@
 # Branching, versioning and releasing
 
-How changes move from a feature branch to a release on `main`, and how version numbers are chosen. The rules themselves are summarised in [CLAUDE.md](../CLAUDE.md); this page is the step-by-step version. For how the packages fit together, see [Architecture](architecture.md).
+How changes move from a feature branch to a release on `main`, and how version numbers are chosen. The rules are summarised in [CLAUDE.md](../CLAUDE.md); this page is the step-by-step version. For how the code fits together, see [Architecture](architecture.md).
 
 ## Branches
 
@@ -16,16 +16,22 @@ Nothing is committed directly to `main` or `dev`.
 
 ## Versions
 
-Every workspace package (`@ethannet/api`, `ui`, `media-server`, `core`, `e2e`, `types`) shares one [semver](https://semver.org) version, `MAJOR.MINOR.PATCH`. [Changesets](https://github.com/changesets/changesets) manages the numbers. `.changeset/config.json` puts every `@ethannet/*` package in one `fixed` group, so a bump to any package bumps them all to the same version. The root `package.json` isn't a workspace package and has no version.
+The photos-api has one [semver](https://semver.org) version, `MAJOR.MINOR.PATCH`, in two places that must match at release:
+
+- `<version>` in `pom.xml` (the jar is `target/photos-api-<version>.jar`). Between releases, `dev` carries the next version with `-SNAPSHOT`, e.g. `0.2.0-SNAPSHOT`.
+- `info.version` in `openapi/photos-api.yaml`, which the ui sees when it syncs the contract.
+
+The ui repo, [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui), has its own version (managed with Changesets) and doesn't follow this one.
 
 | Bump | When |
 | --- | --- |
-| **major** | A breaking change to an API contract in `packages/types` or to an endpoint, or a large user-facing overhaul. |
-| **minor** | A new feature or endpoint that doesn't break anything. |
+| **major** | A breaking change to the contract in `openapi/photos-api.yaml` (see [API contract](features/api-contract.md#changing-the-contract)), or a large overhaul. |
+| **minor** | A new endpoint or feature that doesn't break anything. |
 | **patch** | A bug fix or a small internal change. |
-| **none** | Docs, tests or tooling only. Use an empty changeset. |
 
-Until the first `1.0.0` release, the repo stays on `0.y.z` and breaking changes bump the minor version.
+Until the first `1.0.0` release, the version stays on `0.y.z` and breaking changes bump the minor version.
+
+There are no changeset files. The bump is decided at release time from what merged since the last tag (`git log vX.Y.Z..dev`), so give each merge a clear message and note any contract change in it.
 
 ## Working on a feature
 
@@ -37,35 +43,26 @@ Until the first `1.0.0` release, the repo stays on `0.y.z` and breaking changes 
    git switch -c feature/<short-description>
    ```
 
-2. Do the work (tests first; see [CLAUDE.md](../CLAUDE.md)).
-3. Add a changeset describing the change:
-
-   ```
-   pnpm changeset                                        # interactive
-   pnpm changeset --minor @ethannet/api -m "Add /api/x"  # non-interactive
-   pnpm changeset --empty                                # no version bump
-   ```
-
-   This writes a small Markdown file to `.changeset/`. Commit it with the rest of the branch. Because versions are fixed, naming any one package bumps all of them. The summary becomes the changelog entry, so write it for someone reading release notes.
-
-4. Check what the release would do with `pnpm changeset status --verbose`. It compares against `dev`, so a local `dev` branch must exist.
-5. Merge the branch into `dev` once `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
+2. Do the work, tests first (see [CLAUDE.md](../CLAUDE.md)).
+3. Merge the branch into `dev` once `./mvnw verify` passes.
 
 ## Cutting a release
 
 Only when the owner decides to release.
 
-1. On a release branch off `dev`, apply the pending changesets:
+1. On a release branch off `dev`, set the release version in both places:
 
    ```
    git switch dev && git pull
    git switch -c feature/release-vX.Y.Z
-   pnpm version-packages
+   ./mvnw versions:set -DnewVersion=X.Y.Z -DgenerateBackupPoms=false
+   # and set info.version: X.Y.Z in openapi/photos-api.yaml
+   ./mvnw verify
    ```
 
-   This deletes the changeset files, bumps every package to the new version and adds an entry to each package's `CHANGELOG.md`. Check the diff, then commit it and merge it into `dev`.
+   Commit, and merge it into `dev`.
 
-2. Merge `dev` into `main` and tag the merge commit with the new version:
+2. Merge `dev` into `main`, tag the merge commit and push the tag:
 
    ```
    git switch main && git pull
@@ -74,10 +71,10 @@ Only when the owner decides to release.
    git push origin main vX.Y.Z
    ```
 
-Changesets' own `publish` and `git-tag` commands aren't used. The packages are private and aren't published to npm, and the single `vX.Y.Z` tag replaces per-package tags.
+3. Back on `dev`, on another short branch, move to the next snapshot (`./mvnw versions:set -DnewVersion=X.Y+1.0-SNAPSHOT -DgenerateBackupPoms=false`) and merge it.
+4. Tell the ui: in `ethannet-ui`, `pnpm --filter @ethannet/schema sync:api vX.Y.Z`.
 
 ## Edge cases
 
-- **Several changesets on `dev`**: the release uses the largest bump among them. One minor and two patches gives a minor release.
-- **A branch with only an empty changeset**: it contributes nothing to the version. If every pending changeset is empty, `pnpm version-packages` changes no versions, so there's nothing to release.
-- **`pnpm changeset status` says it can't find where HEAD diverged from `dev`**: create the local branch with `git branch dev origin/dev`.
+- **A contract change and a code-only fix in the same release**: the release takes the largest bump among them.
+- **Forgot to set `info.version`**: the ui would vendor a spec claiming the old version. Fix it on `dev` and cut a patch release; don't move an existing tag.

@@ -1,39 +1,52 @@
 # Architecture
 
-## Monorepo layout
+## Two repos
 
-- `apps/api` — Express API server (TypeScript).
-- `apps/ui` — Next.js app (App Router, TypeScript).
-- `apps/core` — Node.js app (TypeScript).
-- `apps/media-server` — Express server (TypeScript) that reads files from a local media directory (`MEDIA_DIR`, defaults to `apps/media-server/media`) and serves them to clients: `GET /api/media` lists files as JSON, `GET /media/<name>` streams a file via `express.static`.
-- `apps/e2e` — Playwright end-to-end tests that exercise api + ui together. It's a workspace package rather than living inside either app, since it depends on both.
-- `packages/types` — TypeScript types shared between api and ui (API request/response contracts, and the `UiMessages` copy contract).
-- `packages/messages` — the ui copy as next-intl-style JSON (`messages/en.json`), shared by ui components and tests so they can't drift. See [UI messages](features/ui-messages.md).
-- `packages/navigation` — the site link config (`navLinks`, `socialLinks`: each a route plus the message key of its label) and `resolveLinks`, shared by the ui layout and the e2e suite. See [Site layout](features/site-layout.md).
-- `docs` — documentation for the whole repo: [plans](plans) (one per piece of work, named `YYYY-MM-DD-short-slug.md`) and [features](features), which describe how each feature works and how to test it (e.g. [Site layout](features/site-layout.md)).
+ethannet is split across two repos, one language each:
 
-`apps/` holds things that run or deploy; `packages/` holds things apps import. This mirrors the convention used by Turborepo, Vercel's examples, and the T3 stack.
+| Repo | What it is | Port |
+| --- | --- | --- |
+| **ethannet** (this repo) | The Spring Boot **photos-api** and its Postgres database. Java 25, Maven. It owns the API contract. | photos-api 4001, Postgres 5432 |
+| [**ethannet-ui**](https://github.com/Ethan-S-Evans/ethannet-ui) | The Next.js UI, Storybook and the Playwright e2e suite. TypeScript, pnpm. | ui 3000, Storybook 6006 |
 
-## Shared types, no build step
+Until November 2026 this repo was an all-TypeScript pnpm monorepo, with an Express api, a media-server and the UI together. It was split so that each repo has one toolchain, its own version and release cycle, and its own CI. The backend kept this repo, since it's the long-lived service the photo features grow into, and the UI moved to `ethannet-ui` with its history. The old TypeScript code is still in this repo's git history. The plan behind the split is [2026-11-12-spring-boot-photos-api](plans/2026-11-12-spring-boot-photos-api.md).
 
-`packages/types/package.json` points its `main`/`types`/`exports` directly at `./src/index.ts` — real TypeScript source, not compiled output. pnpm symlinks `node_modules/@ethannet/types` to `packages/types`, so both api and ui resolve `@ethannet/types` straight to source.
+## Why Spring Boot and Postgres
 
-`packages/messages` and `packages/navigation` work the same way, except that they're runtime imports (a JSON object, and plain arrays and a function), not `import type`.
+The photo app needs a real backend with relational data: photos, albums, members and share links. Spring Boot with JPA, Flyway and Postgres is the standard enterprise stack for that, and it puts Java and SQL experience in the portfolio next to the TypeScript and React work in the UI.
 
-- **Next.js** normally refuses to process `.ts` files under `node_modules`, even symlinked workspace ones. `transpilePackages: ["@ethannet/messages", "@ethannet/navigation", "@ethannet/types"]` in `apps/ui/next.config.ts` is the documented escape hatch for monorepo-internal packages.
-- **Express** dev loop uses `tsx watch`, which transpiles any `.ts` file it imports regardless of where it lives, so no extra config is needed.
+## Contract first
 
-Both consumers `import type` the shared interfaces, so there's zero runtime coupling — editing `packages/types/src/index.ts` is picked up immediately by both apps with no build step in between.
+```
+openapi/photos-api.yaml  (this repo, source of truth)
+  ├─ openapi-generator (Maven, at build time) → Java interfaces + models in target/generated-sources
+  │     └─ controllers implement them, so a route or shape that drifts fails to compile
+  └─ released as tag vX.Y.Z → ethannet-ui runs `sync:api vX.Y.Z`
+        └─ vendored copy → openapi-typescript → TS types the ui imports
+```
 
-## API build
+See [API contract](features/api-contract.md) for the workflow and the rules for changing it.
 
-The api's production build uses `tsup` (an esbuild wrapper) instead of `tsc`, because `tsc --outDir` fails once it has to emit a file for `packages/types/src/index.ts`, which lives outside the api's `rootDir`. `tsup` bundles `apps/api/src/index.ts` into a single `dist/index.js`; since all cross-package imports are `import type`, esbuild strips them entirely, so the compiled api has no runtime dependency on the types package. `tsc --noEmit` is still used per-package purely for typechecking.
+## Layout
+
+- `openapi/photos-api.yaml` — the API contract.
+- `src/main/java/net/ethannet/photos/` — the application, in feature packages (`hello/`, later `photos/`, `albums/`...). Each feature holds its controller, its services or builders, and later its entities and repositories. Cross-cutting configuration lives in `config/`. See [Photos API](features/photos-api.md).
+- `src/main/resources/application.yml` — configuration, with every environment-specific value read from an env var with a local default.
+- `src/main/resources/db/migration/` — Flyway migrations (`V1__description.sql`, ...). Flyway owns the schema; Hibernate runs with `ddl-auto: validate`.
+- `src/test/java/...` — tests, mirroring the main packages. `TestcontainersConfiguration` provides a throwaway Postgres, and `TestPhotosApiApplication` runs the app against it.
+- `compose.yaml` — local Postgres for development.
+- `docs/` — this documentation: [plans](plans) and [features](features).
+
+## Runtime picture
+
+Browser → Next.js ui (`ethannet-ui`, 3000) → photos-api (4001) → Postgres (5432). The ui's server components call `/api/*`; CORS allows the ui's origin for browser calls. `/actuator/health` reports `UP` only when the database is reachable, and the ui's e2e suite waits on it. Every process binds to `127.0.0.1` only, so nothing is reachable from the network (see [Photos API](features/photos-api.md#localhost-only)).
+
+Later plans add S3 for photo bytes (the browser uploads directly through presigned URLs) and an async worker for thumbnails and EXIF.
 
 ## Tooling
 
-- **Biome** — a single root `biome.json` handles linting and formatting for the whole repo (replaces ESLint + Prettier).
-- **Vitest** — unit tests, scoped per-package: the api tests a pure function extracted from its route handler (`node` environment); the ui tests a presentational component with `@testing-library/react` (`jsdom` environment), using `@testing-library/user-event` for realistic clicks and key presses.
-- **CSS Modules** — the ui's styling approach. Each component has an `X.module.css` beside it; global resets and color variables live in `apps/ui/src/app/globals.css`. No CSS framework.
-- **Storybook** — lives in `apps/ui` (via `@storybook/nextjs`) for developing UI components in isolation. It doubles as the UI documentation: each story file uses autodocs.
-- **Changesets** — manages the single shared version of every package; see [Branching, versioning and releasing](releasing.md).
-- **Playwright** — lives in `apps/e2e`, which starts both the api and ui dev servers itself (via Playwright's `webServer` array config) before running browser tests against the full stack.
+- **Maven wrapper** (`./mvnw`) — no global Maven install. It downloads the Maven version pinned in `.mvn/wrapper/maven-wrapper.properties`.
+- **openapi-generator-maven-plugin** — generates interfaces (`interfaceOnly`, `skipDefaultInterface`) and models in `generate-sources`.
+- **Spotless + google-java-format** — formatting. `spotless:check` runs in `verify`.
+- **JUnit 5, Spring's test slices, Testcontainers** — see [Photos API](features/photos-api.md#testing).
+- **Podman** — the container runtime, for `compose.yaml` and for Testcontainers through Podman's Docker-compatible socket.

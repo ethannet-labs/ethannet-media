@@ -1,1 +1,0 @@
-export { HelloCard } from "./HelloCard";

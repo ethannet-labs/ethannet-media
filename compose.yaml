@@ -1,0 +1,25 @@
+# Local development only. Start with `podman compose up -d postgres`.
+# Credentials match the defaults in src/main/resources/application.yml.
+#
+# Localhost only: the container shares the host's network and Postgres listens on
+# 127.0.0.1, so nothing is published to other machines and no container network
+# (or subnet) is created.
+services:
+  postgres:
+    image: docker.io/library/postgres:18
+    network_mode: host
+    command: ["postgres", "-c", "listen_addresses=127.0.0.1", "-c", "port=5432"]
+    environment:
+      POSTGRES_DB: photos
+      POSTGRES_USER: photos
+      POSTGRES_PASSWORD: photos
+    volumes:
+      - photos-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U photos -d photos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  photos-db:
