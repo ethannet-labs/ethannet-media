@@ -1,31 +1,52 @@
 # Architecture
 
-## Monorepo layout
+## Two repos
 
-- `apps/backend` — Express API server (TypeScript).
-- `apps/frontend` — Next.js app (App Router, TypeScript).
-- `apps/e2e` — Playwright end-to-end tests that exercise backend + frontend together. It's a workspace package rather than living inside either app, since it depends on both.
-- `packages/types` — TypeScript types shared between backend and frontend (API request/response contracts).
-- `docs` — documentation for the whole repo, including [plans](plans).
+ethannet is split across two repos, one language each:
 
-`apps/` holds things that run or deploy; `packages/` holds things apps import. This mirrors the convention used by Turborepo, Vercel's examples, and the T3 stack.
+| Repo | What it is | Port |
+| --- | --- | --- |
+| **ethannet-media** (this repo) | The Spring Boot **photos-api** and its Postgres database. Java 25, Maven. It owns the API contract. | photos-api 4001, Postgres 5432 |
+| [**ethannet-ui**](https://github.com/Ethan-S-Evans/ethannet-ui) | The Next.js UI, Storybook and the Playwright e2e suite. TypeScript, pnpm. | ui 3000, Storybook 6006 |
 
-## Shared types, no build step
+Until November 2026 this repo was an all-TypeScript pnpm monorepo, with an Express api, a media-server and the UI together. It was split so that each repo has one toolchain, its own version and release cycle, and its own CI. The backend kept this repo, since it's the long-lived service the photo features grow into, and the UI moved to `ethannet-ui` with its history. The old TypeScript code is still in this repo's git history. The repo was called `ethannet` until 2026-11-14, when it was renamed `ethannet-media`, locally and on GitHub. GitHub redirects the old URL. The plan behind the split is [2026-11-12-spring-boot-photos-api](plans/2026-11-12-spring-boot-photos-api.md).
 
-`packages/types/package.json` points its `main`/`types`/`exports` directly at `./src/index.ts` — real TypeScript source, not compiled output. pnpm symlinks `node_modules/@ethannet/types` to `packages/types`, so both backend and frontend resolve `@ethannet/types` straight to source.
+## Why Spring Boot and Postgres
 
-- **Next.js** normally refuses to process `.ts` files under `node_modules`, even symlinked workspace ones. `transpilePackages: ["@ethannet/types"]` in `apps/frontend/next.config.ts` is the documented escape hatch for monorepo-internal packages.
-- **Express** dev loop uses `tsx watch`, which transpiles any `.ts` file it imports regardless of where it lives, so no extra config is needed.
+The photo app needs a real backend with relational data: photos, albums, members and share links. Spring Boot with JPA, Flyway and Postgres is the standard enterprise stack for that, and it puts Java and SQL experience in the portfolio next to the TypeScript and React work in the UI.
 
-Both consumers `import type` the shared interfaces, so there's zero runtime coupling — editing `packages/types/src/index.ts` is picked up immediately by both apps with no build step in between.
+## Contract first
 
-## Backend build
+```
+openapi/photos-api.yaml  (this repo, source of truth)
+  ├─ openapi-generator (Maven, at build time) → Java interfaces + models in target/generated-sources
+  │     └─ controllers implement them, so a route or shape that drifts fails to compile
+  └─ released as tag vX.Y.Z → ethannet-ui runs `sync:api vX.Y.Z`
+        └─ vendored copy → openapi-typescript → TS types the ui imports
+```
 
-The backend's production build uses `tsup` (an esbuild wrapper) instead of `tsc`, because `tsc --outDir` fails once it has to emit a file for `packages/types/src/index.ts`, which lives outside the backend's `rootDir`. `tsup` bundles `apps/backend/src/index.ts` into a single `dist/index.js`; since all cross-package imports are `import type`, esbuild strips them entirely, so the compiled backend has no runtime dependency on the types package. `tsc --noEmit` is still used per-package purely for typechecking.
+See [API contract](features/api-contract.md) for the workflow and the rules for changing it.
+
+## Layout
+
+- `openapi/photos-api.yaml` — the API contract.
+- `src/main/java/net/ethannet/photos/` — the application, in feature packages (`hello/`, later `photos/`, `albums/`...). Each feature holds its controller, its services or builders, and later its entities and repositories. Cross-cutting configuration lives in `config/`. See [Photos API](features/photos-api.md).
+- `src/main/resources/application.yml` — configuration, with every environment-specific value read from an env var with a local default.
+- `src/main/resources/db/migration/` — Flyway migrations (`V1__description.sql`, ...). Flyway owns the schema; Hibernate runs with `ddl-auto: validate`.
+- `src/test/java/...` — tests, mirroring the main packages. `TestcontainersConfiguration` provides a throwaway Postgres, and `TestPhotosApiApplication` runs the app against it.
+- `compose.yaml` — local Postgres for development.
+- `docs/` — this documentation: [plans](plans) and [features](features).
+
+## Runtime picture
+
+Browser → Next.js ui (`ethannet-ui`, 3000) → photos-api (4001) → Postgres (5432). The ui's server components call `/api/*`; CORS allows the ui's origin for browser calls. `/actuator/health` reports `UP` only when the database is reachable, and the ui's e2e suite waits on it. Every process binds to `127.0.0.1` only, so nothing is reachable from the network (see [Photos API](features/photos-api.md#localhost-only)).
+
+Later plans add S3 for photo bytes (the browser uploads directly through presigned URLs) and an async worker for thumbnails and EXIF.
 
 ## Tooling
 
-- **Biome** — a single root `biome.json` handles linting and formatting for the whole repo (replaces ESLint + Prettier).
-- **Vitest** — unit tests, scoped per-package: the backend tests a pure function extracted from its route handler (`node` environment); the frontend tests a presentational component with `@testing-library/react` (`jsdom` environment).
-- **Storybook** — lives in `apps/frontend` (via `@storybook/nextjs`) for developing UI components in isolation.
-- **Playwright** — lives in `apps/e2e`, which starts both the backend and frontend dev servers itself (via Playwright's `webServer` array config) before running browser tests against the full stack.
+- **Maven wrapper** (`./mvnw`) — no global Maven install. It downloads the Maven version pinned in `.mvn/wrapper/maven-wrapper.properties`.
+- **openapi-generator-maven-plugin** — generates interfaces (`interfaceOnly`, `skipDefaultInterface`) and models in `generate-sources`.
+- **Spotless + google-java-format** — formatting. `spotless:check` runs in `verify`.
+- **JUnit 5, Spring's test slices, Testcontainers** — see [Photos API](features/photos-api.md#testing).
+- **Podman** — the container runtime, for `compose.yaml` and for Testcontainers through Podman's Docker-compatible socket.
