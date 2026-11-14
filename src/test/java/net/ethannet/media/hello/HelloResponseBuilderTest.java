@@ -1,4 +1,4 @@
-package net.ethannet.photos.hello;
+package net.ethannet.media.hello;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import net.ethannet.photos.api.model.HelloResponse;
+import net.ethannet.media.api.model.HelloResponse;
 import org.junit.jupiter.api.Test;
 
 class HelloResponseBuilderTest {
@@ -18,7 +18,7 @@ class HelloResponseBuilderTest {
   void returnsTheGreeting() {
     HelloResponse response = builderAt(Clock.fixed(NOW, ZoneOffset.UTC)).build();
 
-    assertThat(response.getMessage()).isEqualTo("Hello from the photos API!");
+    assertThat(response.getMessage()).isEqualTo("Hello from the media API!");
   }
 
   @Test

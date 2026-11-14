@@ -1,12 +1,12 @@
-package net.ethannet.photos;
+package net.ethannet.media;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PhotosApiApplication {
+public class MediaApiApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(PhotosApiApplication.class, args);
+    SpringApplication.run(MediaApiApplication.class, args);
   }
 }

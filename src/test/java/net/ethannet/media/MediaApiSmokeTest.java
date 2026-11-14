@@ -1,4 +1,4 @@
-package net.ethannet.photos;
+package net.ethannet.media;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
-class PhotosApiSmokeTest {
+class MediaApiSmokeTest {
 
   @Autowired private MockMvc mvc;
 
@@ -40,6 +40,6 @@ class PhotosApiSmokeTest {
   void servesTheHelloEndpoint() throws Exception {
     mvc.perform(get("/api/hello"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Hello from the photos API!"));
+        .andExpect(jsonPath("$.message").value("Hello from the media API!"));
   }
 }

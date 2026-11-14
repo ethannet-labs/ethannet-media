@@ -1,4 +1,4 @@
-package net.ethannet.photos.config;
+package net.ethannet.media.config;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

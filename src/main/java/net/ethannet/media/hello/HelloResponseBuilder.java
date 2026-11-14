@@ -1,9 +1,9 @@
-package net.ethannet.photos.hello;
+package net.ethannet.media.hello;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import net.ethannet.photos.api.model.HelloResponse;
+import net.ethannet.media.api.model.HelloResponse;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HelloResponseBuilder {
 
-  static final String MESSAGE = "Hello from the photos API!";
+  static final String MESSAGE = "Hello from the media API!";
 
   private final Clock clock;
 

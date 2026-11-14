@@ -1,4 +1,4 @@
-# Photos API
+# Media API
 
 The Spring Boot service behind the ethannet ui. Today it serves one endpoint, `GET /api/hello`, which is the first vertical slice through the contract, the api and the ui. The plan this was built from is [2026-11-12-spring-boot-photos-api](../plans/2026-11-12-spring-boot-photos-api.md). For how it fits with the ui, see [Architecture](../architecture.md); for the contract, see [API contract](api-contract.md).
 
@@ -18,11 +18,11 @@ The Spring Boot service behind the ethannet ui. Today it serves one endpoint, `G
 
 ## Localhost only
 
-Nothing the photos-api runs is reachable from other machines, which matters on shared networks such as public Wi-Fi:
+Nothing the media-api runs is reachable from other machines, which matters on shared networks such as public Wi-Fi:
 
 | What | Listens on | How |
 | --- | --- | --- |
-| photos-api | `127.0.0.1:4001` | `server.address: ${SERVER_ADDRESS:127.0.0.1}` in `application.yml` |
+| media-api | `127.0.0.1:4001` | `server.address: ${SERVER_ADDRESS:127.0.0.1}` in `application.yml` |
 | compose Postgres | `127.0.0.1:5432` | `network_mode: host` plus `listen_addresses=127.0.0.1`. No port is published and no container network is created. |
 | Testcontainers Postgres | `127.0.0.1:<random>` | `TestcontainersConfiguration` binds its published port to `127.0.0.1` |
 | Ryuk | not started | `TESTCONTAINERS_RYUK_DISABLED=true` |
@@ -33,7 +33,7 @@ The compose Postgres uses the host's network, which also sidesteps a Podman prob
 
 ## Running it
 
-Against the compose Postgres (data persists in the `photos-db` volume):
+Against the compose Postgres (data persists in the `media-db` volume):
 
 ```
 podman compose up -d postgres
@@ -56,8 +56,8 @@ All set in `src/main/resources/application.yml`, each with an env var override:
 | --- | --- | --- |
 | `SERVER_ADDRESS` | `127.0.0.1` | Address to listen on (loopback only by default) |
 | `PORT` | `4001` | HTTP port |
-| `DB_URL` | `jdbc:postgresql://localhost:5432/photos` | JDBC URL |
-| `DB_USERNAME` / `DB_PASSWORD` | `photos` / `photos` | Database credentials (match `compose.yaml`) |
+| `DB_URL` | `jdbc:postgresql://localhost:5432/media` | JDBC URL |
+| `DB_USERNAME` / `DB_PASSWORD` | `media` / `media` | Database credentials (match `compose.yaml`) |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated browser origins allowed to call `/api/**` |
 
 Only `/actuator/health` is exposed from Actuator.
@@ -65,18 +65,18 @@ Only `/actuator/health` is exposed from Actuator.
 ## Package structure
 
 ```
-net.ethannet.photos
-  PhotosApiApplication
+net.ethannet.media
+  MediaApiApplication
   config/      ClockConfig (system UTC Clock bean), CorsConfig + CorsProperties (app.cors.*)
   hello/       HelloController (implements generated HelloApi) → HelloResponseBuilder
-  api/         generated from openapi/photos-api.yaml (target/generated-sources, not committed)
+  api/         generated from openapi/media-api.yaml (target/generated-sources, not committed)
 ```
 
 Each feature gets its own package. Within it, the flow is **controller → service → repository**: the controller implements the generated interface and only translates HTTP, services hold the logic, and repositories (Spring Data JPA) hold persistence. Pure logic such as `HelloResponseBuilder` takes its dependencies (here a `Clock`) through the constructor, so it can be tested with no Spring. All injection is constructor injection, never field `@Autowired`.
 
 ## Adding an endpoint
 
-1. Add the path and schemas to `openapi/photos-api.yaml` (see [API contract](api-contract.md#changing-the-contract)). Give each operation an `operationId` and a `tags` entry: the tag names the generated interface (`photos` → `PhotosApi`).
+1. Add the path and schemas to `openapi/media-api.yaml` (see [API contract](api-contract.md#changing-the-contract)). Give each operation an `operationId` and a `tags` entry: the tag names the generated interface (`photos` → `PhotosApi`).
 2. `./mvnw generate-sources` to see the generated interface and models in `target/generated-sources/openapi`.
 3. Write the failing tests: a plain JUnit test for the service or builder, and a `@WebMvcTest` for the controller.
 4. Implement the controller (`implements PhotosApi`) and the service.
@@ -91,6 +91,6 @@ Each feature gets its own package. Within it, the flow is **controller → servi
 | --- | --- | --- |
 | Unit (JUnit 5 + AssertJ) | `HelloResponseBuilderTest` | Pure logic with a fixed `Clock`: the message, and a UTC timestamp even when the clock's zone isn't UTC. |
 | Web slice (`@WebMvcTest`) | `HelloControllerTest` | Status, content type and exact JSON shape against the contract (builder mocked with `@MockitoBean`), plus CORS: the configured origin is allowed and others get `403`. |
-| Integration (`@SpringBootTest` + Testcontainers) | `PhotosApiSmokeTest` | The whole app against real Postgres 18: Flyway validates with nothing pending, `/actuator/health` is `UP`, and `/api/hello` serves the real greeting. |
+| Integration (`@SpringBootTest` + Testcontainers) | `MediaApiSmokeTest` | The whole app against real Postgres 18: Flyway validates with nothing pending, `/actuator/health` is `UP`, and `/api/hello` serves the real greeting. |
 
-End to end, the ui repo's Playwright suite renders the greeting from a running photos-api (`tests/home.spec.ts` in [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui)).
+End to end, the ui repo's Playwright suite renders the greeting from a running media-api (`tests/home.spec.ts` in [ethannet-ui](https://github.com/Ethan-S-Evans/ethannet-ui)).

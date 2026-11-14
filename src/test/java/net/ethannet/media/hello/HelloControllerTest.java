@@ -1,4 +1,4 @@
-package net.ethannet.photos.hello;
+package net.ethannet.media.hello;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.OffsetDateTime;
-import net.ethannet.photos.api.model.HelloResponse;
-import net.ethannet.photos.config.CorsConfig;
+import net.ethannet.media.api.model.HelloResponse;
+import net.ethannet.media.config.CorsConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
