@@ -62,14 +62,19 @@ Only when the owner decides to release.
 
    Commit, and merge it into `dev`.
 
-2. Merge `dev` into `main`, tag the merge commit and push the tag:
+2. Merge `dev` into `main` **through a pull request**, then tag the merge commit. `main` has a GitHub ruleset (no deletion, no force-push, and CodeQL code-scanning and code-quality results required), so a direct push to `main` is refused. A pull request gets its CodeQL results before merging:
 
    ```
+   git push origin dev
+   gh pr create --base main --head dev --title "Release vX.Y.Z" --body "Release vX.Y.Z"
+   # wait for the CodeQL checks, then merge with a merge commit:
+   gh pr merge --merge
    git switch main && git pull
-   git merge --no-ff dev
-   git tag vX.Y.Z
-   git push origin main vX.Y.Z
+   git tag -a vX.Y.Z -m "vX.Y.Z"
+   git push origin vX.Y.Z
    ```
+
+   CodeQL runs on every push to `main` and on every pull request into it.
 
 3. Back on `dev`, on another short branch, move to the next snapshot (`./mvnw versions:set -DnewVersion=X.Y+1.0-SNAPSHOT -DgenerateBackupPoms=false`) and merge it.
 4. Tell the ui: in `ethannet-ui`, `pnpm --filter @ethannet/schema sync:api vX.Y.Z`.
